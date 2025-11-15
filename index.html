@@ -85,33 +85,21 @@
       <input type="number" id="emissive-strength" min="0" max="1" step="0.05" value="0">
     </div>
 
-    <!-- NEW: Rotation toggle -->
-    <div class="control-group">
-      <label>
-        <input type="checkbox" id="enable-rotation" checked>
-        Enable Random Rotation
-      </label>
-    </div>
-
   </div>
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.js"></script>
 
   <script>
-    const MODEL_BASE_URL = 'https://LukeHDeck.github.io/day-4-mydata/models';
+    const MODEL_BASE_URL = 'https://LukeHDeck.github.io/day-4-datatry2/models';
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiZGVja2RvZyIsImEiOiJjbDl5YWJydXcwMnl6M3Jrbml2djd5ZTJtIn0.hFpqesRFKogZg_ku3KKS_A';
 
-    // Scale values
     let scales = {
       'extra-large': 20,
       'large': 20,
       'medium': 20,
       'small': 20
     };
-
-    // NEW: rotation toggle
-    let enableRotation = true;
 
     let emissiveStrength = 0;
 
@@ -128,7 +116,7 @@
       antialias: true
     });
 
-    // Scale controls
+    // Scale inputs
     ['extra-large','large','medium','small'].forEach(type=>{
       const input=document.getElementById(`scale-${type}`);
       const handleUpdate=e=>{
@@ -142,20 +130,13 @@
       input.addEventListener('change',handleUpdate);
     });
 
-    // Brightness control
-    const emissiveInput=document.getElementById('emissive-strength');
-    emissiveInput.addEventListener('input',e=>{
+    // Brightness input
+    document.getElementById('emissive-strength').addEventListener('input',e=>{
       emissiveStrength=parseFloat(e.target.value);
       updateTreeLayer();
     });
 
-    // NEW: rotation toggle
-    document.getElementById('enable-rotation').addEventListener('change',e=>{
-      enableRotation=e.target.checked;
-      updateTreeLayer();
-    });
-
-    // MODEL URL builder
+    // Model URL creator
     function createModelExpression(){
       return [
         'concat',
@@ -167,7 +148,7 @@
       ];
     }
 
-    // SCALE EXPRESSION
+    // Scale logic
     function createScaleExpression(){
       return [
         'case',
@@ -178,14 +159,12 @@
       ];
     }
 
-    // NEW: rotation expression
+    // ⭐ ALWAYS-ON RANDOM ROTATION
     function createRotationExpression(){
-      return enableRotation
-        ? [0, 0, ['random', 0, 360, ['get','index']]]
-        : [0, 0, 0];
+      return [0, 0, ['random', 0, 360, ['get','index']]];
     }
 
-    // UPDATE TREE LAYER
+    // Update tree layer
     function updateTreeLayer(){
       if(map.getLayer('tree-layer')){
         map.setPaintProperty('tree-layer','model-scale',createScaleExpression());
@@ -194,7 +173,6 @@
       }
     }
 
-    // LOAD MAP + TREE LAYER
     map.on('style.load',()=>{
 
       map.setConfigProperty('basemap','lightPreset','day');
@@ -233,7 +211,7 @@
                 14,0, 15,1
               ],
 
-              // NEW: ROTATION
+              // ⭐ ALWAYS-ON RANDOM ROTATION
               'model-rotation': createRotationExpression(),
 
               'model-scale': createScaleExpression(),
