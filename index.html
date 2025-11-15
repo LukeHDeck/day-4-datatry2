@@ -4,8 +4,14 @@
   <title>Lambertville Trees</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css"
+    type="text/css">
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl-loaders.js"></script>
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.js"></script>
+  <script
+    src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
   
   <style>
     body { margin:0; padding:0; font-family:'Helvetica Neue',Arial,sans-serif; }
@@ -102,17 +108,34 @@
 
     let emissiveStrength = 0;
 
+    // Define custom style with imports
+    const style = {
+      version: 8,
+      imports: [
+        {
+          id: 'standard',
+          url: 'mapbox://styles/mapbox/standard',
+          config: {
+            "showPointOfInterestLabels": false
+          }
+        }
+      ],
+      sources: {},
+      layers: []
+    };
+
     const map = new mapboxgl.Map({
       container: 'map',
       center: [-74.945, 40.367],
       zoom: 16,
       pitch: 60,
       bearing: 0,
-      style: 'mapbox://styles/mapbox/standard',
+      style: style,
       minZoom: 14,
       maxZoom: 22,
       hash: true,
-      antialias: true
+      antialias: true,
+      lightPreset: 'day'
     });
 
     // Scale inputs
@@ -174,8 +197,6 @@
 
     map.on('style.load',()=>{
 
-      map.setConfigProperty('basemap','lightPreset','day');
-
       fetch('./lambertville-trees-v1.geojson')
         .then(r=>r.json())
         .then(data=>{
@@ -222,6 +243,14 @@
     });
 
     map.addControl(new mapboxgl.NavigationControl(),'top-left');
+
+    // Add geocoder control
+    map.addControl(
+      new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl
+      })
+    );
 
     map.on('idle',()=>map.repaint=false);
     map.on('move',()=>map.repaint=true);
